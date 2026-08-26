@@ -4,49 +4,33 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script>
-/* Access guard — runs before anything else:
-   1. Web-only: must be served over http(s), not opened as a local file.
-   2. Desktop-only: block phones/tablets and ask users to sign in from a Laptop/PC. */
+/* Desktop-only guard — gate purely on screen resolution.
+   Small screens (phones/tablets) are blocked and told to use a Laptop/PC. */
 (function () {
-  var block = function (title, body) {
-    window.stop && window.stop();
-    var render = function () {
-      document.documentElement.innerHTML =
-        '<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>' +
-        '<body style="margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;' +
-        'background:radial-gradient(110% 70% at 50% 0%,#241C16 0%,#0C0A09 70%);' +
-        'font-family:system-ui,-apple-system,sans-serif;color:#F7F1E6;text-align:center;padding:24px">' +
-        '<div style="max-width:360px">' +
-        '<div style="font:700 42px/1 serif;color:#E9A23B;margin-bottom:16px">Loaf ’n Latte</div>' +
-        '<h1 style="font-size:20px;margin:0 0 10px">' + title + '</h1>' +
-        '<p style="font-size:14px;line-height:1.6;color:#9A9089;margin:0">' + body + '</p>' +
-        '</div></body>';
-    };
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', render);
-    } else {
-      render();
-    }
-    throw new Error('Access blocked: ' + title);
+  var MIN_WIDTH = 1024; // horizontal resolution below this = treated as mobile
+  var w = (window.screen && screen.width) ? screen.width : window.innerWidth;
+  if (w >= MIN_WIDTH) return;
+
+  window.stop && window.stop();
+  var render = function () {
+    document.documentElement.innerHTML =
+      '<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>' +
+      '<body style="margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;' +
+      'background:radial-gradient(110% 70% at 50% 0%,#241C16 0%,#0C0A09 70%);' +
+      'font-family:system-ui,-apple-system,sans-serif;color:#F7F1E6;text-align:center;padding:24px">' +
+      '<div style="max-width:360px">' +
+      '<div style="font:700 42px/1 serif;color:#E9A23B;margin-bottom:16px">Loaf ’n Latte</div>' +
+      '<h1 style="font-size:20px;margin:0 0 10px">Please use a Laptop or PC</h1>' +
+      '<p style="font-size:14px;line-height:1.6;color:#9A9089;margin:0">This app can only be accessed on a ' +
+      'larger screen. Please open it and sign in through a Laptop / PC to continue.</p>' +
+      '</div></body>';
   };
-
-  // 1. Web-only
-  var p = location.protocol;
-  if (p !== 'http:' && p !== 'https:') {
-    block('Open me on the web',
-      'This app runs online only. Please visit it at its web address (http/https) rather than opening the file directly from disk.');
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', render);
+  } else {
+    render();
   }
-
-  // 2. Desktop-only — detect phones and tablets
-  var ua = navigator.userAgent || '';
-  var mp = navigator.maxTouchPoints || 0;
-  var isPhoneUA  = /Mobi|Android|iPhone|iPod|Windows Phone|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-  var isTabletUA = /iPad|Tablet|PlayBook|Silk|Kindle/i.test(ua) || (/Macintosh/i.test(ua) && mp > 1); // iPadOS masquerades as Mac
-  var isTouchSmall = mp > 0 && Math.min(screen.width, screen.height) < 820;
-  if (isPhoneUA || isTabletUA || isTouchSmall) {
-    block('Please use a Laptop or PC',
-      'This app can only be accessed from a desktop or laptop. Please open it and sign in through a Laptop / PC to continue.');
-  }
+  throw new Error('Blocked: screen width ' + w + 'px is below ' + MIN_WIDTH + 'px.');
 })();
 </script>
 <script src="./support.js"></script>
