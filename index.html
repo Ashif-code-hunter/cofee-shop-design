@@ -3,6 +3,34 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+/* Web-only guard: this app must be served over http(s), not opened as a local file. */
+(function () {
+  var p = location.protocol;
+  if (p !== 'http:' && p !== 'https:') {
+    window.stop && window.stop();
+    var block = function () {
+      document.documentElement.innerHTML =
+        '<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>' +
+        '<body style="margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;' +
+        'background:radial-gradient(110% 70% at 50% 0%,#241C16 0%,#0C0A09 70%);' +
+        'font-family:system-ui,-apple-system,sans-serif;color:#F7F1E6;text-align:center;padding:24px">' +
+        '<div style="max-width:340px">' +
+        '<div style="font:700 42px/1 serif;color:#E9A23B;margin-bottom:16px">Loaf ’n Latte</div>' +
+        '<h1 style="font-size:20px;margin:0 0 10px">Open me on the web</h1>' +
+        '<p style="font-size:14px;line-height:1.6;color:#9A9089;margin:0">This app runs online only. ' +
+        'Please visit it at its web address (http/https) rather than opening the file directly from disk.</p>' +
+        '</div></body>';
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', block);
+    } else {
+      block();
+    }
+    throw new Error('Web-only: local file access is blocked.');
+  }
+})();
+</script>
 <script src="./support.js"></script>
 </head>
 <body>
