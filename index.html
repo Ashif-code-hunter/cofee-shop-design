@@ -7,8 +7,8 @@
 /* Desktop-only guard — gate purely on screen resolution.
    Small screens (phones/tablets) are blocked and told to use a Laptop/PC. */
 (function () {
-  var MIN_WIDTH = 1024; // horizontal resolution below this = treated as mobile
-  var w = (window.screen && screen.width) ? screen.width : window.innerWidth;
+  var MIN_WIDTH = 1024; // viewport width below this = treated as mobile
+  var w = window.innerWidth || document.documentElement.clientWidth;
   if (w >= MIN_WIDTH) return;
 
   window.stop && window.stop();
