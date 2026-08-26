@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet"><style>
+body{margin:0;background:#0C0A09;font-family:'DM Sans',system-ui,sans-serif}
+a{color:#E9A23B;text-decoration:none}a:hover{color:#F5BD68}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes halo{0%{box-shadow:0 0 0 0 rgba(233,162,59,.38)}70%{box-shadow:0 0 0 20px rgba(233,162,59,0)}100%{box-shadow:0 0 0 0 rgba(233,162,59,0)}}
+@keyframes steam{0%{opacity:.15;transform:translateY(0)}50%{opacity:.5;transform:translateY(-10px)}100%{opacity:.15;transform:translateY(-20px)}}
+.scr{overflow-y:auto;scrollbar-width:none}.scr::-webkit-scrollbar{display:none}
+.hrow{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.hrow::-webkit-scrollbar{display:none}
+</style></helmet>
+<div style="min-height:100vh;display:flex;align-items:flex-start;justify-content:center;gap:48px;padding:52px 34px;background:radial-gradient(110% 70% at 50% 0%,#241C16 0%,#0C0A09 70%)">
+  <div style="max-width:290px;position:sticky;top:52px">
+    <div style="font:700 10.5px 'DM Sans',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#E9A23B;margin-bottom:14px">Loaf ’n Latte · Dial</div>
+    <h1 style="font-family:Fraunces,serif;font-weight:900;font-size:33px;line-height:1;letter-spacing:-.02em;color:#F7F1E6;margin:0 0 14px">The whole app,<br>two taps deep.</h1>
+    <p style="font-size:13px;line-height:1.65;color:#9A9089;margin:0 0 20px;text-wrap:pretty">Every feature in the walkthrough is here — open browsing, branch-aware menu, allergen flags, scheduling, Bean Club, staff queue and admin reports. The fast path stays two presses: the usual → pay.</p>
+    <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C;margin-bottom:9px">View as</div>
+    <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:22px">
+      <sc-for list="{{ roles }}" as="r" hint-placeholder-count="3">
+        <button onClick="{{ r.pick }}" style="text-align:left;background:{{ r.bg }};border:1px solid {{ r.bd }};color:{{ r.fg }};border-radius:12px;padding:11px 13px;font:700 12.5px 'DM Sans',sans-serif;cursor:pointer">{{ r.name }}<span style="display:block;font-weight:400;font-size:11px;color:#8E857E;margin-top:2px">{{ r.sub }}</span></button>
+      </sc-for>
+    </div>
+    <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C;margin-bottom:9px">Notifications</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:22px">
+      <sc-for list="{{ pushDemos }}" as="p" hint-placeholder-count="4">
+        <button onClick="{{ p.fire }}" style="background:transparent;border:1px solid #2C2420;color:#8E857E;border-radius:100px;padding:6px 11px;font:500 11.5px 'DM Sans',sans-serif;cursor:pointer" style-hover="border-color:#4A403A">{{ p.name }}</button>
+      </sc-for>
+    </div>
+    <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C;margin-bottom:9px">Jump to</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px">
+      <sc-for list="{{ jumps }}" as="j" hint-placeholder-count="8">
+        <button onClick="{{ j.go }}" style="background:{{ j.bg }};border:1px solid {{ j.bd }};color:{{ j.fg }};border-radius:100px;padding:6px 11px;font:500 11.5px 'DM Sans',sans-serif;cursor:pointer">{{ j.name }}</button>
+      </sc-for>
+    </div>
+    <div style="padding-top:14px;border-top:1px solid #2C2420;font:11px/1.6 ui-monospace,Menlo,monospace;color:#6B625C">Sample photography stands in for the real shoot: one drink shot, one bake shot, applied by category.<br>Prices in £ per the walkthrough.</div>
+  </div>
+
+  <div style="width:392px;height:812px;background:#000;border-radius:52px;padding:11px;box-shadow:0 44px 100px rgba(0,0,0,.6),0 0 0 1px #33291F;flex:none;position:sticky;top:52px">
+    <div style="position:relative;width:100%;height:100%;background:#14100D;border-radius:42px;overflow:hidden;display:flex;flex-direction:column">
+      <div style="position:absolute;top:9px;left:50%;transform:translateX(-50%);width:104px;height:28px;background:#000;border-radius:16px;z-index:60"></div>
+      <div style="height:46px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 5px;font:500 12.5px 'DM Sans',sans-serif;color:#EFE7DB;z-index:50"><span>{{ clock }}</span><span style="letter-spacing:.07em">▮▮ ⌁</span></div>
+
+      <sc-if value="{{ showToast }}">
+        <div style="position:absolute;top:52px;left:14px;right:14px;z-index:70;background:#241C16;border:1px solid #4A3B26;border-radius:16px;padding:12px 14px;display:flex;gap:11px;align-items:flex-start;box-shadow:0 16px 40px rgba(0,0,0,.5);animation:rise .3s both">
+          <span style="flex:none;width:26px;height:26px;border-radius:8px;background:#E9A23B"></span>
+          <span style="flex:1"><span style="display:block;font:700 12.5px 'DM Sans',sans-serif;color:#F7F1E6">{{ toastTitle }}</span><span style="display:block;font-size:11.5px;color:#9A9089;margin-top:2px;line-height:1.45">{{ toastBody }}</span></span>
+          <button onClick="{{ closeToast }}" style="background:none;border:none;color:#6B625C;font-size:15px;cursor:pointer;padding:0">×</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+        <div class="scr" style="flex:1;min-height:0;padding:4px 22px 18px;animation:fade .25s both">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <button onClick="{{ goBranches }}" style="display:flex;align-items:center;gap:8px;background:none;border:none;padding:0;cursor:pointer;font:500 12.5px 'DM Sans',sans-serif;color:#9A9089"><span style="width:5px;height:5px;border-radius:50%;background:#E9A23B"></span>{{ branch }} <span style="color:#5E554E">▾</span></button>
+            <button onClick="{{ goRewards }}" style="background:none;border:none;cursor:pointer;font:500 12.5px 'DM Sans',sans-serif;color:#9A9089;padding:0">{{ points }} beans</button>
+          </div>
+
+          <sc-if value="{{ promoOn }}">
+            <div style="margin-top:16px;background:linear-gradient(100deg,#3B2A14,#241C16);border:1px solid #4A3B26;border-radius:18px;padding:14px 15px;display:flex;align-items:center;gap:12px;animation:rise .35s both">
+              <span style="flex:none;font:700 9.5px 'DM Sans',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#14100D;background:#E9A23B;border-radius:100px;padding:4px 8px">Flash</span>
+              <span style="flex:1;font-size:12.5px;color:#F0E7D9;line-height:1.45">{{ promoText }}</span>
+              <button onClick="{{ closePromo }}" style="background:none;border:none;color:#8E857E;font-size:15px;cursor:pointer">×</button>
+            </div>
+          </sc-if>
+
+          <div style="margin-top:26px;font:500 13px 'DM Sans',sans-serif;color:#7E756E">{{ greeting }}</div>
+          <div style="position:relative;margin-top:6px">
+            <div style="position:absolute;top:-24px;left:4px;width:24px;height:24px;border-radius:50%;background:#E9A23B;filter:blur(11px);animation:steam 3.4s ease-in-out infinite"></div>
+            <h2 style="font-family:Fraunces,serif;font-weight:900;font-size:44px;line-height:.95;letter-spacing:-.03em;color:#F7F1E6;margin:0">{{ usualName }}</h2>
+          </div>
+          <div style="font-size:13.5px;color:#9A9089;margin-top:9px;line-height:1.5">{{ usualLine }}</div>
+          <sc-if value="{{ usualUnavailable }}">
+            <div style="margin-top:10px;background:#2A1A17;border:1px solid #5B2F26;border-radius:12px;padding:10px 12px;font-size:11.5px;color:#E2947F;line-height:1.45">{{ unavailableText }}</div>
+          </sc-if>
+
+          <button onClick="{{ orderUsual }}" style="margin-top:22px;width:100%;background:#E9A23B;color:#14100D;border:none;border-radius:22px;padding:19px 22px;display:flex;align-items:center;justify-content:space-between;font:700 16px 'DM Sans',sans-serif;cursor:pointer;animation:halo 2.8s ease-out infinite" style-hover="background:#F2B355">
+            <span>Order the usual</span><span style="font-family:Fraunces,serif;font-weight:900;font-size:19px">{{ usualPrice }}</span>
+          </button>
+          <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:12px">
+            <span style="font:500 11.5px 'DM Sans',sans-serif;color:#6B625C">Straight to payment · {{ eta }}</span>
+            <button onClick="{{ editUsual }}" title="Edit this order" style="display:flex;align-items:center;gap:6px;background:rgba(233,162,59,.12);border:1px solid rgba(233,162,59,.35);border-radius:100px;padding:6px 11px;font:700 11.5px 'DM Sans',sans-serif;color:#E9A23B;cursor:pointer" style-hover="background:rgba(233,162,59,.24)"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="#E9A23B" stroke-width="1.9" stroke-linecap="round"><path d="M12.4 1.2l2.4 2.4L5.6 12.4 2 13.6l1.2-3.6z"/></svg>Edit</button>
+          </div>
+
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin:30px 0 11px">
+            <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C">Favourites</div>
+            <button onClick="{{ goMenu }}" style="background:none;border:none;font:700 12px 'DM Sans',sans-serif;color:#E9A23B;cursor:pointer;padding:0">Full menu</button>
+          </div>
+          <div class="hrow">
+            <sc-for list="{{ favCards }}" as="f" hint-placeholder-count="3">
+              <button onClick="{{ f.open }}" style="flex:none;width:132px;text-align:left;background:#1C1714;border:1px solid #2C2420;border-radius:16px;padding:0;overflow:hidden;cursor:pointer" style-hover="border-color:#4A403A">
+                <div style="height:66px;background:#241C16"><sc-if value="{{ f.isFood }}"><img src="img/food.webp" alt="Favourite" style="width:100%;height:100%;object-fit:cover;display:block"></sc-if><sc-if value="{{ f.isDrink }}"><img src="img/drink.avif" alt="Favourite" style="width:100%;height:100%;object-fit:cover;display:block"></sc-if></div>
+                <div style="padding:9px 10px 11px"><div style="font:700 12.5px 'DM Sans',sans-serif;color:#F7F1E6">{{ f.name }}</div><div style="font-size:11px;color:#8E857E;margin-top:2px">{{ f.sub }}</div></div>
+              </button>
+            </sc-for>
+          </div>
+
+          <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C;margin:26px 0 11px">Popular at {{ branch }}</div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <sc-for list="{{ popular }}" as="p" hint-placeholder-count="3">
+              <button onClick="{{ p.open }}" style="width:100%;text-align:left;display:flex;align-items:center;gap:12px;background:none;border:none;border-bottom:1px solid #1F1A16;padding:12px 0;cursor:pointer">
+                <span style="flex:none;width:46px;height:46px;border-radius:13px;overflow:hidden;display:block"><sc-if value="{{ p.isFood }}"><img src="img/food.webp" alt="Popular item" style="width:100%;height:100%;object-fit:cover;display:block"></sc-if><sc-if value="{{ p.isDrink }}"><img src="img/drink.avif" alt="Popular item" style="width:100%;height:100%;object-fit:cover;display:block"></sc-if></span>
+                <span style="flex:1;min-width:0"><span style="display:block;font:700 13.5px 'DM Sans',sans-serif;color:#F7F1E6">{{ p.name }}</span><span style="display:block;font-size:11.5px;color:{{ p.noteFg }};margin-top:2px">{{ p.note }}</span></span>
+                <span style="font:700 13px 'DM Sans',sans-serif;color:#F7F1E6">{{ p.price }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="height:20px"></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isBranches }}">
+        <div class="scr" style="flex:1;min-height:0;padding:4px 22px 18px;animation:fade .25s both">
+          <div style="display:flex;align-items:center;gap:12px;margin:12px 0 6px">
+            <button onClick="{{ back }}" style="width:34px;height:34px;border-radius:50%;background:none;border:1px solid #2C2420;color:#F7F1E6;font-size:15px;cursor:pointer">←</button>
+            <h2 style="font-family:Fraunces,serif;font-weight:600;font-size:22px;margin:0;color:#F7F1E6">Choose a branch</h2>
+          </div>
+          <p style="font-size:12.5px;color:#8E857E;line-height:1.55;margin:0 0 16px">Menu, prices and availability all follow the branch you pick.</p>
+          <button onClick="{{ useLocation }}" style="width:100%;background:#241C16;border:1px dashed #4A3B26;border-radius:16px;padding:13px 15px;display:flex;align-items:center;gap:11px;cursor:pointer;margin-bottom:16px;text-align:left">
+            <span style="flex:none;width:8px;height:8px;border-radius:50%;background:#E9A23B"></span>
+            <span style="flex:1;font:700 12.5px 'DM Sans',sans-serif;color:#F7F1E6">{{ locLabel }}<span style="display:block;font-weight:400;font-size:11.5px;color:#8E857E;margin-top:2px">{{ locSub }}</span></span>
+          </button>
+          <sc-for list="{{ branchList }}" as="b" hint-placeholder-count="4">
+            <button onClick="{{ b.pick }}" style="width:100%;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:12px;background:{{ b.bg }};border:1.5px solid {{ b.bd }};border-radius:16px;padding:14px 15px;margin-bottom:9px;cursor:pointer">
+              <span><span style="display:block;font:700 13.5px 'DM Sans',sans-serif;color:#F7F1E6">{{ b.name }}</span><span style="display:block;font-size:11.5px;color:#8E857E;margin-top:3px">{{ b.hours }} · prep {{ b.prep }}</span></span>
+              <span style="font:700 12px 'DM Sans',sans-serif;color:#E9A23B;white-space:nowrap">{{ b.dist }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isMenu }}">
+        <div style="flex:none;padding:6px 22px 0">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <h2 style="font-family:Fraunces,serif;font-weight:600;font-size:22px;margin:0;color:#F7F1E6">Menu</h2>
+            <button onClick="{{ goBranches }}" style="background:none;border:1px solid #2C2420;border-radius:100px;padding:7px 12px;font:500 11.5px 'DM Sans',sans-serif;color:#9A9089;cursor:pointer">{{ branch }} · Change</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;background:#1C1714;border:1px solid #2C2420;border-radius:100px;padding:11px 15px;margin-bottom:12px;font-size:12.5px;color:#6B625C"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#6B625C" stroke-width="1.7" stroke-linecap="round"><circle cx="7" cy="7" r="4.4"/><path d="M10.4 10.4 14 14"/></svg>Search the menu</div>
+          <div class="hrow" style="padding-bottom:12px">
+            <sc-for list="{{ cats }}" as="c" hint-placeholder-count="5">
+              <button onClick="{{ c.pick }}" style="flex:none;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }};border-radius:100px;padding:9px 15px;font:700 12px 'DM Sans',sans-serif;cursor:pointer">{{ c.name }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div class="scr" style="flex:1;min-height:0;padding:0 22px 18px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <sc-for list="{{ menuList }}" as="m" hint-placeholder-count="6">
+              <div style="background:#1C1714;border:1px solid #2C2420;border-radius:18px;overflow:hidden;opacity:{{ m.dim }}">
+                <div style="position:relative;height:116px;background:#241C16">
+                  <sc-if value="{{ m.isFood }}"><img src="img/food.webp" alt="Menu item" style="width:100%;height:100%;object-fit:cover;display:block"></sc-if><sc-if value="{{ m.isDrink }}"><img src="img/drink.avif" alt="Menu item" style="width:100%;height:100%;object-fit:cover;display:block"></sc-if>
+                  <sc-if value="{{ m.hasTag }}"><span style="position:absolute;top:8px;left:8px;font:700 8.5px 'DM Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:{{ m.tagFg }};background:{{ m.tagBg }};border-radius:100px;padding:4px 8px;pointer-events:none">{{ m.tag }}</span></sc-if>
+                </div>
+                <button onClick="{{ m.open }}" style="width:100%;text-align:left;background:none;border:none;padding:11px 12px 13px;cursor:pointer">
+                  <span style="display:flex;align-items:baseline;justify-content:space-between;gap:6px"><span style="font:700 12.5px 'DM Sans',sans-serif;color:#F7F1E6">{{ m.name }}</span><span style="font:700 12px 'DM Sans',sans-serif;color:#F7F1E6">{{ m.price }}</span></span>
+                  <span style="display:block;font-size:11px;color:#8E857E;margin-top:4px;line-height:1.4">{{ m.desc }}</span>
+                  <span style="display:block;font-size:10.5px;color:{{ m.warnFg }};margin-top:5px;line-height:1.35">{{ m.warn }}</span>
+                </button>
+              </div>
+            </sc-for>
+          </div>
+          <div style="height:16px"></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isItem }}">
+        <div class="scr" style="flex:1;min-height:0;animation:fade .2s both">
+          <div style="position:relative;height:206px;background:#241C16;display:flex;align-items:flex-end;padding:14px 22px">
+            <sc-if value="{{ itemIsFood }}"><img src="img/food.webp" alt="Product shot" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></sc-if><sc-if value="{{ itemIsDrink }}"><img src="img/drink.avif" alt="Product shot" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></sc-if>
+            <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,16,13,.5) 0%,rgba(20,16,13,0) 45%);pointer-events:none"></div>
+            <button onClick="{{ back }}" style="position:absolute;top:14px;left:22px;width:34px;height:34px;border-radius:50%;background:rgba(12,10,9,.7);border:1px solid #33291F;color:#F7F1E6;font-size:15px;cursor:pointer">←</button>
+            <button onClick="{{ toggleFav }}" title="Save as favourite" style="position:absolute;top:14px;right:22px;width:34px;height:34px;border-radius:50%;background:{{ favBg }};border:1px solid #33291F;color:{{ favFg }};font-size:14px;cursor:pointer">★</button>
+          </div>
+          <div style="padding:18px 22px 20px">
+            <h2 style="font-family:Fraunces,serif;font-weight:900;font-size:28px;line-height:1.05;letter-spacing:-.02em;color:#F7F1E6;margin:0">{{ itemName }}</h2>
+            <p style="font-size:13px;color:#9A9089;margin:8px 0 0;line-height:1.55">{{ itemDesc }}</p>
+            <div style="font-size:11.5px;color:#7E756E;margin-top:8px">Contains: {{ itemAllergens }}</div>
+            <sc-if value="{{ itemConflict }}">
+              <div style="margin-top:12px;background:#2A1A17;border:1px solid #5B2F26;border-radius:14px;padding:12px 13px;display:flex;gap:10px;align-items:flex-start">
+                <span style="flex:none;width:18px;height:18px;border-radius:50%;background:#E2705A;color:#14100D;font:700 12px 'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center">!</span>
+                <span style="font-size:12px;color:#E2947F;line-height:1.5">{{ conflictText }}</span>
+              </div>
+            </sc-if>
+
+            <div style="margin-top:22px;display:flex;flex-direction:column;gap:18px">
+              <sc-for list="{{ dials }}" as="d" hint-placeholder-count="2">
+                <div>
+                  <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C;margin-bottom:9px">{{ d.label }}</div>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <sc-for list="{{ d.opts }}" as="o" hint-placeholder-count="3">
+                      <button onClick="{{ o.pick }}" style="background:{{ o.bg }};color:{{ o.fg }};border:1px solid {{ o.bd }};border-radius:100px;padding:9px 15px;font:700 12.5px 'DM Sans',sans-serif;cursor:pointer">{{ o.name }}</button>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+
+              <div>
+                <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C;margin-bottom:9px">{{ extrasLabel }}</div>
+                <sc-for list="{{ extras }}" as="e" hint-placeholder-count="3">
+                  <button onClick="{{ e.toggle }}" style="width:100%;display:flex;align-items:center;gap:12px;background:{{ e.bg }};border:1px solid {{ e.bd }};border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer;text-align:left">
+                    <span style="flex:none;width:18px;height:18px;border-radius:6px;background:{{ e.box }};border:1px solid {{ e.bd }}"></span>
+                    <span style="flex:1;font:500 12.5px 'DM Sans',sans-serif;color:#F7F1E6">{{ e.name }}</span>
+                    <span style="font:700 12.5px 'DM Sans',sans-serif;color:#E9A23B">{{ e.price }}</span>
+                  </button>
+                </sc-for>
+              </div>
+
+              <sc-if value="{{ hasPrefs }}">
+                <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C;margin-bottom:9px">{{ prefsLabel }}</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <sc-for list="{{ prefs }}" as="p" hint-placeholder-count="3">
+                    <button onClick="{{ p.toggle }}" style="background:{{ p.bg }};color:{{ p.fg }};border:1px solid {{ p.bd }};border-radius:100px;padding:9px 15px;font:500 12.5px 'DM Sans',sans-serif;cursor:pointer">{{ p.name }}</button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+            <div style="height:96px"></div>
+          </div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:14px 22px 24px;background:linear-gradient(180deg,rgba(20,16,13,0),#14100D 40%);display:flex;gap:12px;align-items:center">
+          <div style="display:flex;align-items:center;gap:12px;background:#1C1714;border:1px solid #2C2420;border-radius:16px;padding:9px 12px">
+            <button onClick="{{ decQty }}" style="background:none;border:none;color:#F7F1E6;font-size:17px;cursor:pointer;line-height:1">−</button>
+            <span style="font:700 13.5px 'DM Sans',sans-serif;color:#F7F1E6;min-width:12px;text-align:center">{{ qty }}</span>
+            <button onClick="{{ incQty }}" style="background:none;border:none;color:#F7F1E6;font-size:17px;cursor:pointer;line-height:1">+</button>
+          </div>
+          <button onClick="{{ addToBag }}" style="flex:1;background:#E9A23B;color:#14100D;border:none;border-radius:18px;padding:17px;font:700 14.5px 'DM Sans',sans-serif;cursor:pointer">Add · {{ itemTotal }}</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isBag }}">
+        <div class="scr" style="flex:1;min-height:0;padding:4px 22px 18px;animation:fade .25s both">
+          <div style="display:flex;align-items:center;gap:12px;margin:12px 0 14px">
+            <button onClick="{{ back }}" style="width:34px;height:34px;border-radius:50%;background:none;border:1px solid #2C2420;color:#F7F1E6;font-size:15px;cursor:pointer">←</button>
+            <h2 style="font-family:Fraunces,serif;font-weight:600;font-size:22px;margin:0;color:#F7F1E6">Your bag</h2>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;background:#1C1714;border:1px solid #2C2420;border-radius:14px;padding:11px 14px;margin-bottom:16px">
+            <span style="font:500 12px 'DM Sans',sans-serif;color:#9A9089">Pickup · <b style="color:#F7F1E6">{{ branch }}</b></span>
+            <button onClick="{{ goBranches }}" style="background:none;border:none;font:700 11.5px 'DM Sans',sans-serif;color:#E9A23B;cursor:pointer;padding:0">Change location</button>
+          </div>
+          <sc-for list="{{ cart }}" as="l" hint-placeholder-count="2">
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-bottom:1px solid #1F1A16">
+              <span style="flex:none;width:46px;height:46px;border-radius:13px;overflow:hidden;display:block"><sc-if value="{{ l.isFood }}"><img src="img/food.webp" alt="Bag item" style="width:100%;height:100%;object-fit:cover;display:block"></sc-if><sc-if value="{{ l.isDrink }}"><img src="img/drink.avif" alt="Bag item" style="width:100%;height:100%;object-fit:cover;display:block"></sc-if></span>
+              <span style="flex:1;min-width:0">
+                <span style="display:block;font:700 13.5px 'DM Sans',sans-serif;color:#F7F1E6">{{ l.title }}</span>
+                <span style="display:block;font-size:11.5px;color:#8E857E;margin-top:3px;line-height:1.45">{{ l.opts }}</span>
+                <button onClick="{{ l.remove }}" style="background:none;border:none;padding:0;margin-top:6px;font:500 11px 'DM Sans',sans-serif;color:#E2705A;cursor:pointer">Remove</button>
+              </span>
+              <span style="font:700 13px 'DM Sans',sans-serif;color:#F7F1E6">{{ l.price }}</span>
+            </div>
+          </sc-for>
+          <sc-if value="{{ bagEmpty }}">
+            <div style="text-align:center;padding:50px 10px;color:#6B625C;font-size:13px">Your bag is empty. <button onClick="{{ goMenu }}" style="background:none;border:none;color:#E9A23B;font:700 13px 'DM Sans',sans-serif;cursor:pointer;padding:0">Browse the menu</button></div>
+          </sc-if>
+
+          <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C;margin:24px 0 9px">Pickup time</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ slots }}" as="s" hint-placeholder-count="4">
+              <button onClick="{{ s.pick }}" style="background:{{ s.bg }};color:{{ s.fg }};border:1px solid {{ s.bd }};border-radius:100px;padding:9px 15px;font:700 12.5px 'DM Sans',sans-serif;cursor:pointer">{{ s.name }}</button>
+            </sc-for>
+          </div>
+          <sc-if value="{{ busyBuffer }}">
+            <div style="margin-top:12px;background:#241C16;border:1px solid #4A3B26;border-radius:12px;padding:11px 13px;font-size:11.5px;color:#E0C79C;line-height:1.5">The branch is busy right now — staff added a {{ bufferMins }} min buffer, so ASAP means {{ eta }}.</div>
+          </sc-if>
+          <div style="height:110px"></div>
+        </div>
+        <sc-if value="{{ hasCart }}">
+          <div style="position:absolute;left:0;right:0;bottom:0;padding:14px 22px 24px;background:linear-gradient(180deg,rgba(20,16,13,0),#14100D 40%)">
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:#8E857E;margin-bottom:10px"><span>Earns {{ earnPts }} beans</span><span>{{ eta }}</span></div>
+            <button onClick="{{ goCheckout }}" style="width:100%;background:#E9A23B;color:#14100D;border:none;border-radius:20px;padding:18px;display:flex;align-items:center;justify-content:space-between;font:700 15px 'DM Sans',sans-serif;cursor:pointer"><span>Checkout</span><span style="font-family:Fraunces,serif;font-weight:900;font-size:18px">{{ subtotal }}</span></button>
+          </div>
+        </sc-if>
+      </sc-if>
+
+      <sc-if value="{{ isSignin }}">
+        <div class="scr" style="flex:1;min-height:0;padding:4px 22px 24px;animation:fade .25s both;display:flex;flex-direction:column">
+          <button onClick="{{ back }}" style="width:34px;height:34px;border-radius:50%;background:none;border:1px solid #2C2420;color:#F7F1E6;font-size:15px;cursor:pointer;margin:12px 0 0">←</button>
+          <div style="margin-top:64px">
+            <div style="width:56px;height:56px;border-radius:18px;background:#E9A23B;margin-bottom:22px"></div>
+            <h2 style="font-family:Fraunces,serif;font-weight:900;font-size:31px;line-height:1.05;letter-spacing:-.02em;color:#F7F1E6;margin:0">Sign in to pay</h2>
+            <p style="font-size:13.5px;color:#9A9089;line-height:1.6;margin:12px 0 0">You browsed the whole menu without an account. One tap here creates your profile — no password, ever — and drops <b style="color:#E9A23B">25 welcome beans</b> in your Bean Club.</p>
+          </div>
+          <div style="margin-top:34px;display:flex;flex-direction:column;gap:10px">
+            <button onClick="{{ signIn }}" style="width:100%;background:#F7F1E6;color:#14100D;border:none;border-radius:18px;padding:17px;font:700 14.5px 'DM Sans',sans-serif;cursor:pointer">Continue with Apple</button>
+            <button onClick="{{ signIn }}" style="width:100%;background:none;color:#F7F1E6;border:1px solid #33291F;border-radius:18px;padding:17px;font:700 14.5px 'DM Sans',sans-serif;cursor:pointer">Continue with Google</button>
+          </div>
+          <div style="margin-top:auto;font-size:11.5px;color:#6B625C;line-height:1.6;padding-top:26px">Both options are offered so the app clears App Store review. Nothing is charged until you confirm on the next screen.</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isPay }}">
+        <div class="scr" style="flex:1;min-height:0;padding:4px 22px 18px;animation:fade .25s both">
+          <div style="display:flex;align-items:center;gap:12px;margin:12px 0 20px">
+            <button onClick="{{ back }}" style="width:34px;height:34px;border-radius:50%;background:none;border:1px solid #2C2420;color:#F7F1E6;font-size:15px;cursor:pointer">←</button>
+            <h2 style="font-family:Fraunces,serif;font-weight:600;font-size:22px;margin:0;color:#F7F1E6">Confirm &amp; pay</h2>
+          </div>
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+            <div style="flex:1">
+              <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C;margin-bottom:8px">Pickup · Loaf ’n Latte {{ branch }}</div>
+              <sc-for list="{{ cart }}" as="l" hint-placeholder-count="2">
+                <div style="display:flex;justify-content:space-between;gap:12px;padding:7px 0">
+                  <span style="font-size:13px;color:#F7F1E6;line-height:1.45">{{ l.title }}<span style="display:block;font-size:11.5px;color:#8E857E;margin-top:2px">{{ l.opts }}</span></span>
+                  <span style="font:700 13px 'DM Sans',sans-serif;color:#F7F1E6">{{ l.price }}</span>
+                </div>
+              </sc-for>
+              <div style="font-size:12px;color:#9A9089;margin-top:8px">{{ schedLine }}</div>
+            </div>
+            <button onClick="{{ goBag }}" title="Edit this order" style="flex:none;width:44px;height:44px;border-radius:50%;background:rgba(233,162,59,.14);border:1px solid rgba(233,162,59,.4);display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:rgba(233,162,59,.26)"><svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="#E9A23B" stroke-width="1.6" stroke-linecap="round"><path d="M12.4 1.2l2.4 2.4L5.6 12.4 2 13.6l1.2-3.6z"/></svg></button>
+          </div>
+
+          <sc-if value="{{ payConflict }}">
+            <div style="margin-top:16px;background:#2A1A17;border:1px solid #5B2F26;border-radius:14px;padding:12px 13px;display:flex;gap:10px;align-items:flex-start">
+              <span style="flex:none;width:18px;height:18px;border-radius:50%;background:#E2705A;color:#14100D;font:700 12px 'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center">!</span>
+              <span style="font-size:12px;color:#E2947F;line-height:1.5">Final allergen check — {{ conflictText }}</span>
+            </div>
+          </sc-if>
+
+          <button onClick="{{ toggleRedeem }}" style="width:100%;margin-top:18px;display:flex;align-items:center;gap:12px;background:{{ redeemBg }};border:1px solid {{ redeemBd }};border-radius:16px;padding:14px 15px;cursor:pointer;text-align:left">
+            <span style="flex:none;width:18px;height:18px;border-radius:6px;background:{{ redeemBox }};border:1px solid {{ redeemBd }}"></span>
+            <span style="flex:1"><span style="display:block;font:700 12.5px 'DM Sans',sans-serif;color:#F7F1E6">Spend 100 beans</span><span style="display:block;font-size:11.5px;color:#8E857E;margin-top:2px">£5 off, or swap for any drink</span></span>
+            <span style="font:700 12.5px 'DM Sans',sans-serif;color:#7FB894">{{ redeemAmt }}</span>
+          </button>
+
+          <div style="margin-top:20px;padding-top:16px;border-top:1px solid #241C16;display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;font-size:13px;color:#8E857E"><span>Subtotal</span><span>{{ subtotal }}</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;color:#7FB894"><span>Bean Club</span><span>−{{ discount }}</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:12px;margin-top:4px;border-top:1px solid #241C16"><span style="font:700 13px 'DM Sans',sans-serif;color:#F7F1E6">Total</span><span style="font-family:Fraunces,serif;font-weight:900;font-size:24px;color:#F7F1E6">{{ total }}</span></div>
+            <div style="font-size:11.5px;color:#6B625C">Earns {{ earnPts }} beans · 1 per £1 charged</div>
+          </div>
+
+          <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C;margin:24px 0 10px">Pay with</div>
+          <sc-for list="{{ pays }}" as="p" hint-placeholder-count="2">
+            <button onClick="{{ p.pick }}" style="width:100%;display:flex;align-items:center;gap:12px;background:{{ p.bg }};border:1.5px solid {{ p.bd }};border-radius:16px;padding:14px 15px;margin-bottom:9px;cursor:pointer;text-align:left">
+              <span style="flex:none;width:16px;height:16px;border-radius:50%;border:{{ p.ring }}"></span>
+              <span style="flex:1"><span style="display:block;font:700 13.5px 'DM Sans',sans-serif;color:#F7F1E6">{{ p.name }}</span><span style="display:block;font-size:11.5px;color:#8E857E;margin-top:2px">{{ p.sub }}</span></span>
+            </button>
+          </sc-for>
+          <div style="height:104px"></div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:14px 22px 24px;background:linear-gradient(180deg,rgba(20,16,13,0),#14100D 40%)">
+          <button onClick="{{ payNow }}" style="width:100%;background:#E9A23B;color:#14100D;border:none;border-radius:20px;padding:19px;font:700 16px 'DM Sans',sans-serif;cursor:pointer" style-hover="background:#F2B355">Pay {{ total }}</button>
+          <div style="text-align:center;font-size:11px;color:#6B625C;margin-top:9px">Order is created only after your bank confirms</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isStatus }}">
+        <div class="scr" style="flex:1;min-height:0;padding:4px 22px 22px;animation:fade .3s both;display:flex;flex-direction:column">
+          <div style="margin-top:44px;text-align:center;animation:rise .5s cubic-bezier(.2,.8,.2,1) both">
+            <div style="position:relative;width:104px;height:104px;margin:0 auto 22px">
+              <div style="position:absolute;inset:0;border-radius:50%;background:#241C16;border:1px solid #33291F"></div>
+              <div style="position:absolute;left:50%;top:22px;transform:translateX(-50%);width:22px;height:22px;border-radius:50%;background:#E9A23B;filter:blur(9px);animation:steam 3s ease-in-out infinite"></div>
+              <div style="position:absolute;inset:32px;border-radius:12px;background:#E9A23B"></div>
+            </div>
+            <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#E9A23B">Order {{ orderNo }} · {{ branch }}</div>
+            <h2 style="font-family:Fraunces,serif;font-weight:900;font-size:30px;line-height:1.04;letter-spacing:-.02em;color:#F7F1E6;margin:12px 0 8px">{{ statusHead }}</h2>
+            <p style="font-size:13px;color:#9A9089;margin:0;line-height:1.55">{{ statusSub }}</p>
+          </div>
+          <div style="margin-top:30px;display:flex;flex-direction:column;gap:2px">
+            <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:14px;padding:13px 15px;border-radius:15px;background:{{ s.bg }}">
+                <span style="flex:none;width:24px;height:24px;border-radius:50%;background:{{ s.dot }};display:flex;align-items:center;justify-content:center;font:700 10.5px 'DM Sans',sans-serif;color:#14100D">{{ s.n }}</span>
+                <span style="flex:1;font:700 13px 'DM Sans',sans-serif;color:{{ s.fg }}">{{ s.label }}</span>
+                <span style="font-size:11.5px;color:#7E756E">{{ s.time }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-top:auto;padding-top:24px;display:flex;flex-direction:column;gap:10px">
+            <div style="background:#241C16;border:1px solid #33291F;border-radius:16px;padding:14px 15px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:12.5px;color:#9A9089">Beans earned</span><span style="font-family:Fraunces,serif;font-weight:900;font-size:18px;color:#E9A23B">+{{ earnPts }}</span></div>
+            <button onClick="{{ advanceStage }}" style="width:100%;background:none;border:1px solid #33291F;color:#9A9089;border-radius:16px;padding:14px;font:500 12px 'DM Sans',sans-serif;cursor:pointer">Simulate next stage →</button>
+            <button onClick="{{ goHome }}" style="width:100%;background:#1C1714;border:1px solid #2C2420;color:#F7F1E6;border-radius:16px;padding:15px;font:700 13.5px 'DM Sans',sans-serif;cursor:pointer">Back to home</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isRewards }}">
+        <div class="scr" style="flex:1;min-height:0;padding:4px 22px 18px;animation:fade .25s both">
+          <h2 style="font-family:Fraunces,serif;font-weight:600;font-size:22px;margin:12px 0 16px;color:#F7F1E6">Bean Club</h2>
+          <div style="background:linear-gradient(140deg,#3B2A14,#1C1714);border:1px solid #4A3B26;border-radius:24px;padding:22px">
+            <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#E0C79C">Balance</div>
+            <div style="font-family:Fraunces,serif;font-weight:900;font-size:52px;line-height:1;color:#F7F1E6;margin:8px 0 4px">{{ points }}</div>
+            <div style="font-size:12.5px;color:#B7AA98">beans · 1 per £1 charged · no expiry</div>
+            <div style="margin-top:18px;height:6px;border-radius:100px;background:rgba(247,241,230,.14);overflow:hidden"><div style="height:100%;width:{{ progressPct }};background:#E9A23B;border-radius:100px"></div></div>
+            <div style="font-size:11.5px;color:#B7AA98;margin-top:8px">{{ toNextReward }} beans to your next £5</div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:14px">
+            <button onClick="{{ redeemFive }}" style="flex:1;background:#E9A23B;color:#14100D;border:none;border-radius:16px;padding:15px;font:700 13px 'DM Sans',sans-serif;cursor:pointer">Redeem £5 off</button>
+            <button onClick="{{ redeemDrink }}" style="flex:1;background:none;color:#F7F1E6;border:1px solid #33291F;border-radius:16px;padding:15px;font:700 13px 'DM Sans',sans-serif;cursor:pointer">Free drink</button>
+          </div>
+          <div style="margin-top:14px;background:#1C1714;border:1px dashed #4A3B26;border-radius:18px;padding:15px 16px;display:flex;gap:12px;align-items:center">
+            <span style="flex:none;width:34px;height:34px;border-radius:11px;overflow:hidden;display:block"><img src="img/food.webp" alt="Birthday cake" style="width:100%;height:100%;object-fit:cover;display:block"></span>
+            <span style="flex:1;font-size:12.5px;color:#F7F1E6;line-height:1.45">Birthday treat<span style="display:block;font-size:11.5px;color:#8E857E;margin-top:2px">Any cake or £5 off — lands automatically on {{ birthday }}</span></span>
+          </div>
+          <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C;margin:24px 0 6px">History</div>
+          <sc-for list="{{ history }}" as="h" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #1F1A16">
+              <span style="font-size:12.5px;color:#F7F1E6">{{ h.label }}<span style="display:block;font-size:11px;color:#7E756E;margin-top:2px">{{ h.when }}</span></span>
+              <span style="font:700 13px 'DM Sans',sans-serif;color:{{ h.fg }}">{{ h.delta }}</span>
+            </div>
+          </sc-for>
+          <div style="height:16px"></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isAccount }}">
+        <div class="scr" style="flex:1;min-height:0;padding:4px 22px 18px;animation:fade .25s both">
+          <h2 style="font-family:Fraunces,serif;font-weight:600;font-size:22px;margin:12px 0 16px;color:#F7F1E6">Account</h2>
+          <div style="display:flex;align-items:center;gap:13px;background:#1C1714;border:1px solid #2C2420;border-radius:18px;padding:15px">
+            <span style="flex:none;width:44px;height:44px;border-radius:50%;background:radial-gradient(120% 120% at 30% 20%,#33291F,#211A15);border:1px solid #2C2420;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#8E7355" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="7" r="3"/><path d="M4.5 16.5c0-3 2.5-4.6 5.5-4.6s5.5 1.6 5.5 4.6"/></svg></span>
+            <span style="flex:1"><span style="display:block;font:700 13.5px 'DM Sans',sans-serif;color:#F7F1E6">{{ userName }}</span><span style="display:block;font-size:11.5px;color:#8E857E;margin-top:2px">{{ userSub }}</span></span>
+          </div>
+          <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C;margin:24px 0 6px">Allergies &amp; dietary</div>
+          <p style="font-size:12px;color:#8E857E;line-height:1.55;margin:0 0 11px">Set once — every product is checked against these, on the menu and again at checkout.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ allergyChips }}" as="a" hint-placeholder-count="5">
+              <button onClick="{{ a.toggle }}" style="background:{{ a.bg }};color:{{ a.fg }};border:1px solid {{ a.bd }};border-radius:100px;padding:9px 15px;font:500 12.5px 'DM Sans',sans-serif;cursor:pointer">{{ a.name }}</button>
+            </sc-for>
+          </div>
+          <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C;margin:24px 0 6px">Saved favourites</div>
+          <sc-for list="{{ favRows }}" as="f" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #1F1A16">
+              <span style="font-size:12.5px;color:#F7F1E6">{{ f.name }}<span style="display:block;font-size:11px;color:#7E756E;margin-top:2px">{{ f.sub }}</span></span>
+              <button onClick="{{ f.open }}" style="background:none;border:1px solid #2C2420;border-radius:100px;padding:7px 13px;font:700 11.5px 'DM Sans',sans-serif;color:#E9A23B;cursor:pointer">Order</button>
+            </div>
+          </sc-for>
+          <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C;margin:24px 0 6px">Settings</div>
+          <sc-for list="{{ settings }}" as="s" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid #1F1A16">
+              <span style="font-size:12.5px;color:#F7F1E6">{{ s.name }}</span>
+              <span style="font-size:11.5px;color:#7E756E">{{ s.value }}</span>
+            </div>
+          </sc-for>
+          <div style="height:16px"></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isStaff }}">
+        <div class="scr" style="flex:1;min-height:0;padding:4px 22px 18px;animation:fade .25s both">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin:12px 0 4px">
+            <h2 style="font-family:Fraunces,serif;font-weight:600;font-size:22px;margin:0;color:#F7F1E6">Queue</h2>
+            <span style="font:500 11.5px 'DM Sans',sans-serif;color:#8E857E">{{ branch }} · Sales</span>
+          </div>
+          <p style="font-size:12px;color:#8E857E;margin:0 0 14px">You can move orders and mark items sold out. Prices and refunds stay with Admin.</p>
+          <div style="display:flex;gap:11px;align-items:flex-start;background:#241C16;border:1px solid #4A3B26;border-radius:16px;padding:12px 14px;margin-bottom:12px;animation:rise .3s both">
+            <span style="flex:none;width:8px;height:8px;border-radius:50%;background:#E9A23B;margin-top:5px"></span>
+            <span style="flex:1;font:700 12px 'DM Sans',sans-serif;color:#F7F1E6">New paid order · {{ newestOrder }}<span style="display:block;font-weight:400;font-size:11.5px;color:#9A9089;margin-top:3px;line-height:1.45">Staff alert fires the moment the bank confirms — nothing arrives unannounced.</span></span>
+          </div>
+          <button onClick="{{ toggleBusy }}" style="width:100%;display:flex;align-items:center;gap:12px;background:{{ busyBg }};border:1px solid {{ busyBd }};border-radius:16px;padding:13px 14px;cursor:pointer;text-align:left;margin-bottom:16px">
+            <span style="flex:none;width:34px;height:20px;border-radius:100px;background:{{ busyTrack }};position:relative"><span style="position:absolute;top:2px;left:{{ busyKnob }};width:16px;height:16px;border-radius:50%;background:#14100D"></span></span>
+            <span style="flex:1;font:700 12.5px 'DM Sans',sans-serif;color:#F7F1E6">We’re busy — add {{ bufferMins }} min<span style="display:block;font-weight:400;font-size:11.5px;color:#8E857E;margin-top:2px">{{ busyState }}</span></span>
+          </button>
+          <sc-for list="{{ queue }}" as="q" hint-placeholder-count="3">
+            <div style="background:#1C1714;border:1px solid {{ q.bd }};border-radius:18px;padding:14px 15px;margin-bottom:10px">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <span style="font:700 13px 'DM Sans',sans-serif;color:#F7F1E6">{{ q.no }} · {{ q.who }}</span>
+                <span style="font:700 9.5px 'DM Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:{{ q.tagFg }};background:{{ q.tagBg }};border-radius:100px;padding:4px 9px">{{ q.stage }}</span>
+              </div>
+              <div style="font-size:12px;color:#9A9089;margin-top:7px;line-height:1.5">{{ q.items }}</div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+                <span style="font-size:11.5px;color:#7E756E">{{ q.time }}</span>
+                <button onClick="{{ q.advance }}" style="background:#E9A23B;color:#14100D;border:none;border-radius:12px;padding:9px 14px;font:700 11.5px 'DM Sans',sans-serif;cursor:pointer">{{ q.action }}</button>
+              </div>
+            </div>
+          </sc-for>
+          <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C;margin:22px 0 8px">Sold out today</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ soldOutChips }}" as="s" hint-placeholder-count="4">
+              <button onClick="{{ s.toggle }}" style="background:{{ s.bg }};color:{{ s.fg }};border:1px solid {{ s.bd }};border-radius:100px;padding:9px 14px;font:500 12px 'DM Sans',sans-serif;cursor:pointer">{{ s.name }}</button>
+            </sc-for>
+          </div>
+          <div style="height:16px"></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isAdmin }}">
+        <div class="scr" style="flex:1;min-height:0;padding:4px 22px 18px;animation:fade .25s both">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin:12px 0 14px">
+            <h2 style="font-family:Fraunces,serif;font-weight:600;font-size:22px;margin:0;color:#F7F1E6">Dashboard</h2>
+            <span style="font:500 11.5px 'DM Sans',sans-serif;color:#8E857E">Today · all branches</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+              <div style="background:#1C1714;border:1px solid #2C2420;border-radius:18px;padding:14px">
+                <div style="font:700 9.5px 'DM Sans',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#6B625C">{{ k.label }}</div>
+                <div style="font-family:Fraunces,serif;font-weight:900;font-size:24px;color:#F7F1E6;margin-top:7px">{{ k.value }}</div>
+                <div style="font-size:11px;color:{{ k.fg }};margin-top:3px">{{ k.delta }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C;margin:24px 0 8px">By branch</div>
+          <sc-for list="{{ branchRows }}" as="b" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #1F1A16">
+              <span style="flex:1;font-size:12.5px;color:#F7F1E6">{{ b.name }}</span>
+              <span style="flex:none;width:96px;height:6px;border-radius:100px;background:#241C16;overflow:hidden"><span style="display:block;height:100%;width:{{ b.pct }};background:#E9A23B"></span></span>
+              <span style="font:700 12px 'DM Sans',sans-serif;color:#F7F1E6;width:52px;text-align:right">{{ b.sales }}</span>
+            </div>
+          </sc-for>
+          <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C;margin:24px 0 8px">Reports</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ reports }}" as="r" hint-placeholder-count="5">
+              <span style="background:#1C1714;border:1px solid #2C2420;color:#C9C0B7;border-radius:100px;padding:9px 14px;font:500 12px 'DM Sans',sans-serif">{{ r.name }}</span>
+            </sc-for>
+          </div>
+          <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C;margin:24px 0 8px">Loyalty rules</div>
+          <sc-for list="{{ loyaltyRules }}" as="l" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #1F1A16">
+              <span style="font-size:12.5px;color:#F7F1E6">{{ l.name }}</span>
+              <span style="font:700 12px 'DM Sans',sans-serif;color:#E9A23B">{{ l.value }}</span>
+            </div>
+          </sc-for>
+
+          <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C;margin:24px 0 8px">Admin-only controls</div>
+          <sc-for list="{{ adminControls }}" as="c" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #1F1A16">
+              <span style="font-size:12.5px;color:#F7F1E6">{{ c.name }}<span style="display:block;font-size:11px;color:#7E756E;margin-top:2px">{{ c.sub }}</span></span>
+              <span style="font:500 11.5px 'DM Sans',sans-serif;color:#8E857E;white-space:nowrap">{{ c.value }}</span>
+            </div>
+          </sc-for>
+
+          <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C;margin:24px 0 8px">Refunds</div>
+          <div style="background:#1C1714;border:1px solid #2C2420;border-radius:18px;padding:15px 16px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font:700 12.5px 'DM Sans',sans-serif;color:#F7F1E6">{{ refundOrder }}</span>
+              <span style="font:700 9.5px 'DM Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:{{ refundFg }};background:{{ refundBg }};border-radius:100px;padding:4px 9px">{{ refundState }}</span>
+            </div>
+            <div style="font-size:11.5px;color:#8E857E;margin-top:7px;line-height:1.5">{{ refundNote }}</div>
+            <button onClick="{{ issueRefund }}" style="width:100%;margin-top:12px;background:{{ refundBtnBg }};border:1px solid #5B2F26;color:#E2947F;border-radius:12px;padding:11px;font:700 12px 'DM Sans',sans-serif;cursor:pointer">{{ refundAction }}</button>
+          </div>
+
+          <div style="font:700 10px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B625C;margin:24px 0 8px">Who can do what</div>
+          <div style="display:flex;gap:8px;padding:0 0 8px;border-bottom:1px solid #1F1A16;font:700 9.5px 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#6B625C">
+            <span style="flex:1">Action</span><span style="width:34px;text-align:center">Cus</span><span style="width:34px;text-align:center">Sales</span><span style="width:34px;text-align:center">Adm</span>
+          </div>
+          <sc-for list="{{ matrix }}" as="r" hint-placeholder-count="6">
+            <div style="display:flex;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid #1F1A16">
+              <span style="flex:1;font-size:12px;color:#F7F1E6;line-height:1.35">{{ r.name }}</span>
+              <span style="width:34px;text-align:center;font-size:12.5px;color:{{ r.cFg }}">{{ r.c }}</span>
+              <span style="width:34px;text-align:center;font-size:12.5px;color:{{ r.sFg }}">{{ r.s }}</span>
+              <span style="width:34px;text-align:center;font-size:12.5px;color:{{ r.aFg }}">{{ r.a }}</span>
+            </div>
+          </sc-for>
+          <div style="height:16px"></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showTabs }}">
+        <div style="flex:none;display:flex;border-top:1px solid #241C16;background:#100D0B;padding:8px 10px 22px">
+          <button onClick="{{ goHome }}" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;cursor:pointer">
+            <svg width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="{{ tHomeFg }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.2 10 3l7 5.2V16a1 1 0 0 1-1 1h-3.5v-4.5h-5V17H4a1 1 0 0 1-1-1z"/></svg>
+            <span style="font:700 10px 'DM Sans',sans-serif;color:{{ tHomeFg }}">Home</span>
+          </button>
+          <button onClick="{{ goMenu }}" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;cursor:pointer">
+            <svg width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="{{ tMenuFg }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h9v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/><path d="M13 7.5h2a2 2 0 0 1 0 4h-2"/><path d="M3.5 18h10"/></svg>
+            <span style="font:700 10px 'DM Sans',sans-serif;color:{{ tMenuFg }}">Menu</span>
+          </button>
+          <button onClick="{{ goRewards }}" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;cursor:pointer">
+            <svg width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="{{ tClubFg }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><path d="M7.2 13.6c1.4-4.4 3-6 5.6-7.2-1.4 4.4-3 6-5.6 7.2z"/></svg>
+            <span style="font:700 10px 'DM Sans',sans-serif;color:{{ tClubFg }}">Bean Club</span>
+          </button>
+          <button onClick="{{ goAccount }}" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;cursor:pointer">
+            <svg width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="{{ tAcctFg }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.2 2.7-5 6-5s6 1.8 6 5"/></svg>
+            <span style="font:700 10px 'DM Sans',sans-serif;color:{{ tAcctFg }}">Account</span>
+          </button>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:900,&quot;height&quot;:940}}">
+const BRANCHES = [
+  {name:'Beach Road', hours:'7:00–21:00', prep:'4 min', dist:'0.4 mi'},
+  {name:'Mavoor Road', hours:'7:30–21:30', prep:'6 min', dist:'1.2 mi'},
+  {name:'Palayam', hours:'8:00–20:00', prep:'5 min', dist:'1.9 mi'},
+  {name:'Eranhipalam', hours:'8:00–21:00', prep:'7 min', dist:'3.1 mi'}
+];
+const CATS = ['Popular','Coffee','Cold','Tea','Bakery','Food'];
+const MENU = [
+  {id:1,name:'Flat White',cat:'Coffee',price:3.2,desc:'Double ristretto, silky microfoam',allergens:['Dairy'],pop:true},
+  {id:2,name:'Cortado',cat:'Coffee',price:3.0,desc:'Equal parts espresso and warm milk',allergens:['Dairy']},
+  {id:3,name:'Americano',cat:'Coffee',price:2.6,desc:'Long black, house Ethiopian roast',allergens:[]},
+  {id:4,name:'Mocha',cat:'Coffee',price:3.6,desc:'Dark chocolate, espresso, steamed milk',allergens:['Dairy','Soy'],pop:true},
+  {id:5,name:'Cold Brew',cat:'Cold',price:3.3,desc:'18-hour steep, served over ice',allergens:[],pop:true},
+  {id:6,name:'Iced Matcha',cat:'Cold',price:3.9,desc:'Ceremonial grade, oat milk, ice',allergens:['Dairy']},
+  {id:7,name:'Masala Chai',cat:'Tea',price:3.0,desc:'House spice blend, steamed milk',allergens:['Dairy']},
+  {id:8,name:'Sencha',cat:'Tea',price:2.6,desc:'Grassy, light, second flush',allergens:[]},
+  {id:9,name:'Butter Croissant',cat:'Bakery',price:2.7,desc:'Laminated overnight, baked at six',allergens:['Gluten','Dairy'],pop:true},
+  {id:10,name:'Pistachio Bun',cat:'Bakery',price:3.4,desc:'Cardamom knot, pistachio cream',allergens:['Nuts','Gluten','Dairy']},
+  {id:11,name:'Egg & Avocado Roll',cat:'Food',price:5.4,desc:'Sourdough, soft egg, chilli oil',allergens:['Gluten','Dairy'],ing:['Chilli oil','Rocket','Pickled onion','Feta']},
+  {id:12,name:'Chicken Pesto Sandwich',cat:'Food',price:6.2,desc:'Focaccia, basil pesto, slow-roast chicken',allergens:['Nuts','Gluten','Dairy'],ing:['Pesto','Tomato','Rocket','Parmesan']}
+];
+const SIZES = [{n:'Small',d:-0.3},{n:'Regular',d:0},{n:'Large',d:0.5}];
+const MILKS = [{n:'Oat',d:0.3},{n:'Whole',d:0},{n:'Skim',d:0},{n:'None',d:0}];
+const EXTRAS = [{n:'Extra shot',p:0.6},{n:'Extra matcha',p:0.8},{n:'Vanilla syrup',p:0.4},{n:'Caramel drizzle',p:0.5}];
+const BAKE_EXTRAS = [{n:'Warm it through',p:0},{n:'Salted butter',p:0.4},{n:'Berry jam',p:0.5}];
+const FOOD_EXTRAS = [{n:'Extra cheese',p:0.8},{n:'Side salad',p:1.2},{n:'Chilli sauce',p:0.3}];
+const SERVE = {bake:['As is','Warmed','Sliced'], food:['As is','Toasted','Cut in half']};
+const kindOf = it => it && it.ing ? 'food' : it && it.cat==='Bakery' ? 'bake' : 'drink';
+const extrasFor = k => k==='food' ? FOOD_EXTRAS : k==='bake' ? BAKE_EXTRAS : EXTRAS;
+const PREFS = ['Less ice','No syrup','Extra hot','Room for milk'];
+const ALLERGENS = ['Nuts','Dairy','Gluten','Soy','Sesame'];
+const HIST = [
+  {label:'Order #LL-2839 · Beach Road', when:'Yesterday, 08:12', delta:'+7'},
+  {label:'Refund #LL-2801 · points reversed', when:'Yesterday, 14:20', delta:'−6'},
+  {label:'Redeemed £5 off', when:'12 Aug', delta:'−100'},
+  {label:'Order #LL-2790 · Mavoor Road', when:'11 Aug', delta:'+11'},
+  {label:'Welcome bonus', when:'2 Aug', delta:'+25'}
+];
+const ON = {bg:'#E9A23B', fg:'#14100D', bd:'#E9A23B'};
+const OFF = {bg:'transparent', fg:'#C9C0B7', bd:'#33291F'};
+
+class Component extends DCLogic {
+  state = {
+    role:'customer', screen:'home', branch:0, cat:'Popular', itemId:1,
+    size:1, milk:0, extras:[], prefs:[], removed:[], qty:1,
+    cart:[{id:1, name:'Flat White', size:1, milk:0, extras:[], prefs:[], qty:1, price:3.5}],
+    favs:[1,5,9], signedIn:false, points:240, redeem:false, sched:0, pay:0,
+    allergies:['Nuts'], stage:1, busy:false, promo:true, toast:null, soldOut:[6], refunded:false,
+    qStage:[0,1,2], tick:0
+  };
+
+  componentDidMount(){ this.t = setInterval(()=>this.setState(s=>({tick:s.tick+1})), 30000); }
+  componentWillUnmount(){ clearInterval(this.t); }
+
+  m(n){ return '£' + n.toFixed(2); }
+  isFood(it){ return !!(it && (it.cat==='Bakery' || it.cat==='Food')); }
+  kind(it){ return kindOf(it); }
+  set(o){ this.setState(o); }
+  item(){ return MENU.find(x=>x.id===this.state.itemId) || MENU[0]; }
+
+  linePrice(l){
+    const mi = MENU.find(x=>x.id===l.id) || MENU[0];
+    const k = kindOf(mi);
+    let p = mi.price + (k==='drink' ? SIZES[l.size].d + MILKS[l.milk].d : 0);
+    const ex = extrasFor(k);
+    l.extras.forEach(i => { if(ex[i]) p += ex[i].p; });
+    return p * l.qty;
+  }
+  subtotalNum(){ return this.state.cart.reduce((s,l)=>s+this.linePrice(l), 0); }
+  discountNum(){ return this.state.redeem && this.state.points >= 100 ? 5 : 0; }
+  totalNum(){ return Math.max(0, this.subtotalNum() - this.discountNum()); }
+  prepMins(){ return parseInt(BRANCHES[this.state.branch].prep) + (this.state.busy ? 6 : 0); }
+
+  conflicts(it){ return (it.allergens||[]).filter(a => this.state.allergies.includes(a)); }
+  cartConflicts(){
+    const set = [];
+    this.state.cart.forEach(l => { const it = MENU.find(x=>x.id===l.id); this.conflicts(it).forEach(a => { if(!set.includes(a)) set.push(a); }); });
+    return set;
+  }
+
+  optStyle(on){ return on ? ON : OFF; }
+
+  openItem(id){
+    this.setState({itemId:id, screen:'item', size: kindOf(MENU.find(x=>x.id===id)) === 'drink' ? 1 : 0, milk:0, extras:[], prefs:[], removed:[], qty:1});
+  }
+
+  toast(title, body){
+    this.setState({toast:{title, body}});
+    setTimeout(()=>this.setState(s => (s.toast && s.toast.title===title ? {toast:null} : {})), 4200);
+  }
+
+  renderVals(){
+    const s = this.state, it = this.item(), br = BRANCHES[s.branch], kind = kindOf(it);
+    const greeting = 'Tuesday, 8:04 — your usual hour';
+    const usual = s.cart[0] || {id:1,size:1,milk:0,extras:[],prefs:[],qty:1};
+    const usualItem = MENU.find(x=>x.id===usual.id) || MENU[0];
+    const conf = this.cartConflicts();
+    const itConf = this.conflicts(it);
+    const sub = this.subtotalNum(), disc = this.discountNum(), tot = this.totalNum();
+    const earn = Math.round(tot);
+    const stageNames = ['New','Preparing','Ready','Collected'];
+
+    const chip = (name, on, onClick) => {
+      const c = this.optStyle(on);
+      return {name, bg:c.bg, fg:c.fg, bd:c.bd, pick:onClick, toggle:onClick};
+    };
+
+    const menuItems = MENU.filter(m => s.cat==='Popular' ? m.pop : m.cat===s.cat);
+
+    return {
+      clock: '08:04',
+      role: s.role,
+      isHome: s.role==='customer' && s.screen==='home',
+      isBranches: s.role==='customer' && s.screen==='branches',
+      isMenu: s.role==='customer' && s.screen==='menu',
+      isItem: s.role==='customer' && s.screen==='item',
+      isBag: s.role==='customer' && s.screen==='bag',
+      isSignin: s.role==='customer' && s.screen==='signin',
+      isPay: s.role==='customer' && s.screen==='pay',
+      isStatus: s.role==='customer' && s.screen==='status',
+      isRewards: s.role==='customer' && s.screen==='rewards',
+      isAccount: s.role==='customer' && s.screen==='account',
+      isStaff: s.role==='staff', isAdmin: s.role==='admin',
+      showTabs: s.role==='customer' && ['home','menu','rewards','account'].includes(s.screen),
+
+      roles: [
+        {name:'Customer', sub:'Order, pay, collect, earn', bg:s.role==='customer'?'#241C16':'transparent', bd:s.role==='customer'?'#E9A23B':'#2C2420', fg:'#F7F1E6', pick:()=>this.set({role:'customer', screen:'home'})},
+        {name:'Sales Person', sub:'Branch queue + sold out', bg:s.role==='staff'?'#241C16':'transparent', bd:s.role==='staff'?'#E9A23B':'#2C2420', fg:'#F7F1E6', pick:()=>this.set({role:'staff'})},
+        {name:'Admin', sub:'Dashboard, reports, loyalty', bg:s.role==='admin'?'#241C16':'transparent', bd:s.role==='admin'?'#E9A23B':'#2C2420', fg:'#F7F1E6', pick:()=>this.set({role:'admin'})}
+      ],
+      jumps: ['home','branches','menu','item','bag','signin','pay','status','rewards','account'].map(k => ({
+        name: k==='signin' ? 'sign in' : k,
+        bg: s.role==='customer' && s.screen===k ? '#241C16' : 'transparent',
+        bd: s.role==='customer' && s.screen===k ? '#E9A23B' : '#2C2420',
+        fg: s.role==='customer' && s.screen===k ? '#E9A23B' : '#8E857E',
+        go: () => this.set({role:'customer', screen:k})
+      })),
+
+      branch: br.name, points: s.points, greeting, eta: this.prepMins() + ' min',
+      promoOn: s.promo, promoText: 'Two hours only — any bun + filter coffee for £4.50 at ' + br.name + '.',
+      closePromo: () => this.set({promo:false}),
+      showToast: !!s.toast, toastTitle: s.toast ? s.toast.title : '', toastBody: s.toast ? s.toast.body : '',
+      closeToast: () => this.set({toast:null}),
+
+      usualName: usualItem.name,
+      usualLine: SIZES[usual.size].n + ' · ' + MILKS[usual.milk].n + ' milk · ' + br.name,
+      usualPrice: this.m(this.linePrice(usual)),
+      usualUnavailable: s.soldOut.includes(usual.id),
+      unavailableText: usualItem.name + ' is sold out at ' + br.name + ' today — tap edit to swap it. The rest of your order is untouched.',
+      orderUsual: () => this.set({screen: s.signedIn ? 'pay' : 'signin'}),
+      editUsual: () => this.openItem(usual.id),
+
+      favCards: s.favs.map(id => { const f = MENU.find(x=>x.id===id); return {name:f.name, sub:'Saved · ' + this.m(f.price), isFood: this.isFood(f), isDrink: !this.isFood(f), open:()=>this.openItem(id)}; }),
+      popular: MENU.filter(m=>m.pop).map(m => {
+        const out = s.soldOut.includes(m.id), c = this.conflicts(m);
+        return {name:m.name, price:this.m(m.price), isFood: this.isFood(m), isDrink: !this.isFood(m), note: out ? 'Sold out today' : c.length ? 'Contains ' + c.join(', ') : m.desc, noteFg: out || c.length ? '#E2947F' : '#8E857E', open:()=>this.openItem(m.id)};
+      }),
+
+      branchList: BRANCHES.map((b,i) => ({name:b.name, hours:b.hours, prep:b.prep, dist:b.dist, bg:i===s.branch?'#241C16':'transparent', bd:i===s.branch?'#E9A23B':'#2C2420', pick:()=>this.set({branch:i, screen:'menu'})})),
+      locLabel: 'Use my location', locSub: 'Nearest is ' + BRANCHES[0].name + ', 0.4 mi away',
+      useLocation: () => this.set({branch:0, screen:'menu'}),
+
+      cats: CATS.map(c => chip(c, s.cat===c, ()=>this.set({cat:c}))),
+      menuList: menuItems.map(m => {
+        const out = s.soldOut.includes(m.id), c = this.conflicts(m);
+        return {
+          name:m.name, desc:m.desc, price:this.m(m.price), dim: out ? '.45' : '1', isFood: this.isFood(m), isDrink: !this.isFood(m),
+          tag: out ? 'Sold out' : m.pop ? 'Popular' : '', hasTag: !!(out || m.pop), tagBg: out ? '#2A1A17' : '#241C16', tagFg: out ? '#E2947F' : '#E9A23B',
+          warn: c.length ? '⚠ Contains ' + c.join(', ') + ' — saved allergy' : '', warnFg:'#E2947F',
+          open: () => this.openItem(m.id)
+        };
+      }),
+
+      itemName: it.name, itemDesc: it.desc, itemIsFood: this.isFood(it), itemIsDrink: !this.isFood(it),
+      itemAllergens: (it.allergens||[]).length ? it.allergens.join(', ') : 'no listed allergens',
+      itemConflict: itConf.length > 0,
+      conflictText: itConf.length ? it.name + ' contains ' + itConf.join(', ') + ', which is on your allergy list.' : '',
+      favBg: s.favs.includes(it.id) ? '#E9A23B' : 'rgba(12,10,9,.7)',
+      favFg: s.favs.includes(it.id) ? '#14100D' : '#F7F1E6',
+      toggleFav: () => this.setState(st => ({favs: st.favs.includes(it.id) ? st.favs.filter(x=>x!==it.id) : [...st.favs, it.id]})),
+      dials: kind==='drink'
+        ? [
+          {label:'Size', opts: SIZES.map((o,i)=>chip(o.n, s.size===i, ()=>this.set({size:i})))},
+          {label:'Milk', opts: MILKS.map((o,i)=>chip(o.n, s.milk===i, ()=>this.set({milk:i})))}
+        ]
+        : [{label:'Serve', opts: SERVE[kind].map((n,i)=>chip(n, s.size===i, ()=>this.set({size:i})))}],
+      extrasLabel: kind==='drink' ? 'Extras' : 'Add to it',
+      extras: extrasFor(kind).map((e,i) => {
+        const on = s.extras.includes(i);
+        return {name:e.n, price: e.p ? '+' + this.m(e.p) : 'free', bg:on?'#241C16':'transparent', bd:on?'#E9A23B':'#2C2420', box:on?'#E9A23B':'transparent',
+          toggle: () => this.setState(st => ({extras: on ? st.extras.filter(x=>x!==i) : [...st.extras, i]}))};
+      }),
+      hasPrefs: kind !== 'bake',
+      prefsLabel: it.ing ? 'Remove ingredients' : 'Preferences',
+      prefs: (it.ing || PREFS).map((p,i) => {
+        const on = it.ing ? s.removed.includes(i) : s.prefs.includes(i);
+        const c = on ? {bg:'#241C16', fg:'#E9A23B', bd:'#E9A23B'} : OFF;
+        return {name: it.ing ? 'No ' + p.toLowerCase() : p, bg:c.bg, fg:c.fg, bd:c.bd,
+          toggle: () => this.setState(st => it.ing
+            ? ({removed: on ? st.removed.filter(x=>x!==i) : [...st.removed, i]})
+            : ({prefs: on ? st.prefs.filter(x=>x!==i) : [...st.prefs, i]}))};
+      }),
+      qty: s.qty,
+      incQty: () => this.setState(st=>({qty:st.qty+1})),
+      decQty: () => this.setState(st=>({qty:Math.max(1, st.qty-1)})),
+      itemTotal: this.m(this.linePrice({id:it.id, size:s.size, milk:s.milk, extras:s.extras, qty:s.qty})),
+      addToBag: () => {
+        const line = {id:it.id, name:it.name, size:s.size, milk:s.milk, extras:[...s.extras], prefs:[...s.prefs], removed:[...s.removed], qty:s.qty};
+        this.setState(st => ({cart:[...st.cart, line], screen:'bag'}));
+      },
+
+      cart: s.cart.map((l, idx) => {
+        const mi = MENU.find(x=>x.id===l.id) || MENU[0];
+        const k = kindOf(mi), ex = extrasFor(k);
+        const bits = k==='drink' ? [SIZES[l.size].n, MILKS[l.milk].n + ' milk'] : [SERVE[k][l.size] || 'As is'];
+        l.extras.forEach(i => { if(ex[i]) bits.push(ex[i].n); });
+        if(k==='drink') (l.prefs||[]).forEach(i => bits.push(PREFS[i]));
+        (l.removed||[]).forEach(i => bits.push('no ' + (mi.ing ? mi.ing[i].toLowerCase() : '')));
+        return {title: (l.qty>1 ? l.qty + '× ' : '') + mi.name, opts: bits.join(' · '), price: this.m(this.linePrice(l)), isFood: this.isFood(mi), isDrink: !this.isFood(mi),
+          remove: () => this.setState(st => ({cart: st.cart.filter((_,i)=>i!==idx)}))};
+      }),
+      bagEmpty: s.cart.length===0, hasCart: s.cart.length>0, cartCount: s.cart.length,
+      slots: ['ASAP','08:30','08:45','09:00'].map((n,i)=>chip(n, s.sched===i, ()=>this.set({sched:i}))),
+      schedLine: s.sched===0 ? 'ASAP · ready in ' + this.prepMins() + ' min' : 'Scheduled for ' + ['','08:30','08:45','09:00'][s.sched],
+      busyBuffer: s.busy, bufferMins: 6,
+      subtotal: this.m(sub), discount: this.m(disc), total: this.m(tot), earnPts: earn,
+      goCheckout: () => this.set({screen: s.signedIn ? 'pay' : 'signin'}),
+
+      signIn: () => { this.setState(st => ({signedIn:true, points: st.points + 25, screen:'pay'})); this.toast('Welcome to Bean Club', '25 beans added. Profile created — no password needed.'); },
+
+      payConflict: conf.length > 0,
+      redeemBg: s.redeem ? '#241C16' : 'transparent', redeemBd: s.redeem ? '#7FB894' : '#2C2420',
+      redeemBox: s.redeem ? '#7FB894' : 'transparent', redeemAmt: s.redeem ? '−£5.00' : '£5.00',
+      toggleRedeem: () => this.setState(st => ({redeem: !st.redeem})),
+      pays: [
+        {name:'Apple Pay', sub:'Double-click side button', on:s.pay===0},
+        {name:'Google Pay', sub:'Linked to your account', on:s.pay===1},
+        {name:'HDFC ·· 4417', sub:'Saved card', on:s.pay===2}
+      ].map((p,i) => ({...p, bg:p.on?'#241C16':'transparent', bd:p.on?'#E9A23B':'#241C16', ring:p.on?'5px solid #E9A23B':'1.5px solid #4A403A', pick:()=>this.set({pay:i})})),
+      payNow: () => { this.setState(st => ({screen:'status', stage:1, points: st.points - (st.redeem?100:0) + earn})); this.toast('Order confirmed', 'The ' + br.name + ' bar has been notified. We’ll ping you when it’s ready.'); },
+
+      orderNo: '#LL-2841',
+      statusHead: ['Order received','On the bar now','Ready for collection','Collected — enjoy'][s.stage],
+      statusSub: ['The bar has it. Nothing to do.','Skip the queue — head for the pickup shelf.','Grab it from the shelf at ' + br.name + '.','Beans are in your Bean Club balance.'][s.stage],
+      steps: stageNames.map((label, i) => ({
+        n: i+1, label,
+        time: i < s.stage ? 'done' : i === s.stage ? 'now' : '~' + (this.prepMins() * (i - s.stage)) + ' min',
+        bg: i === s.stage ? '#241C16' : 'transparent',
+        dot: i < s.stage ? '#7FB894' : i === s.stage ? '#E9A23B' : '#33291F',
+        fg: i > s.stage ? '#7E756E' : '#F7F1E6'
+      })),
+      advanceStage: () => this.setState(st => {
+        const next = Math.min(3, st.stage + 1);
+        if(next === 2) this.toast('Your order is ready', 'Collect from the pickup shelf at ' + br.name + '.');
+        return {stage: next};
+      }),
+
+      progressPct: Math.min(100, (s.points % 100)) + '%',
+      toNextReward: 100 - (s.points % 100),
+      birthday: '14 March',
+      redeemFive: () => { if(s.points >= 100){ this.setState(st=>({points:st.points-100, redeem:false})); this.toast('£5 reward banked', 'It will apply to your next order automatically.'); } },
+      redeemDrink: () => { if(s.points >= 100){ this.setState(st=>({points:st.points-100})); this.toast('Free drink unlocked', 'Any drink on the menu, on us. Valid at every branch.'); } },
+      history: HIST.map(h => ({...h, fg: h.delta.startsWith('+') ? '#7FB894' : '#E2947F'})),
+
+      userName: s.signedIn ? 'Ashif K.' : 'Guest — browsing',
+      userSub: s.signedIn ? 'Signed in with Apple · member since Aug' : 'Sign in at checkout, one tap',
+      allergyChips: ALLERGENS.map(a => {
+        const on = s.allergies.includes(a);
+        const c = on ? {bg:'#2A1A17', fg:'#E2947F', bd:'#5B2F26'} : OFF;
+        return {name:a, bg:c.bg, fg:c.fg, bd:c.bd, toggle: () => this.setState(st => ({allergies: on ? st.allergies.filter(x=>x!==a) : [...st.allergies, a]}))};
+      }),
+      favRows: s.favs.map(id => { const f = MENU.find(x=>x.id===id); return {name:f.name, sub:'Regular · oat · saved customization', open:()=>this.openItem(id)}; }),
+      settings: [
+        {name:'Push notifications', value:'On'},
+        {name:'Order ready alerts', value:'On'},
+        {name:'Flash promotions', value:'On'},
+        {name:'Payment methods', value:'3 saved'}
+      ],
+
+      tHomeFg: s.screen==='home' ? '#E9A23B' : '#6B625C',
+      tMenuFg: s.screen==='menu' ? '#E9A23B' : '#6B625C',
+      tClubFg: s.screen==='rewards' ? '#E9A23B' : '#6B625C',
+      tAcctFg: s.screen==='account' ? '#E9A23B' : '#6B625C',
+      goAccount: () => this.set({screen:'account'}),
+
+      busyBg: s.busy ? '#241C16' : 'transparent', busyBd: s.busy ? '#E9A23B' : '#2C2420',
+      busyTrack: s.busy ? '#E9A23B' : '#33291F', busyKnob: s.busy ? '16px' : '2px',
+      busyState: s.busy ? 'Customers now see ' + this.prepMins() + ' min' : 'Prep time showing as ' + BRANCHES[s.branch].prep,
+      toggleBusy: () => this.setState(st => ({busy: !st.busy})),
+      queue: [
+        {no:'#LL-2841', who:'Ashif K.', items:'1× Flat White · Regular · oat'},
+        {no:'#LL-2840', who:'Nabeel P.', items:'2× Cold Brew · large · no syrup'},
+        {no:'#LL-2839', who:'Rhea M.', items:'1× Chicken Pesto Sandwich · no pesto, 1× Sencha'}
+      ].map((q,i) => {
+        const st = s.qStage[i];
+        const tag = ['New','Preparing','Ready'][st];
+        return {...q, stage:tag, time:['just now','3 min ago','6 min ago'][i],
+          bd: st===0 ? '#4A3B26' : '#2C2420',
+          tagBg: st===2 ? '#1B2A21' : '#241C16', tagFg: st===2 ? '#7FB894' : '#E9A23B',
+          action: ['Start preparing','Mark ready','Mark collected'][st],
+          advance: () => this.setState(prev => { const q2 = [...prev.qStage]; q2[i] = Math.min(2, q2[i]+1); return {qStage:q2}; })};
+      }),
+      soldOutChips: [6,10,12,5].map(id => {
+        const mi = MENU.find(x=>x.id===id), on = s.soldOut.includes(id);
+        const c = on ? {bg:'#2A1A17', fg:'#E2947F', bd:'#5B2F26'} : OFF;
+        return {name:mi.name, bg:c.bg, fg:c.fg, bd:c.bd, toggle: () => this.setState(st2 => ({soldOut: on ? st2.soldOut.filter(x=>x!==id) : [...st2.soldOut, id]}))};
+      }),
+
+      kpis: [
+        {label:'Sales today', value:'£1,284', delta:'+12% vs last Tue', fg:'#7FB894'},
+        {label:'Orders', value:'216', delta:'34 pending', fg:'#8E857E'},
+        {label:'Avg order', value:'£5.94', delta:'+£0.31', fg:'#7FB894'},
+        {label:'Top product', value:'Flat White', delta:'61 sold', fg:'#8E857E'}
+      ],
+      branchRows: [
+        {name:'Beach Road', sales:'£512', pct:'100%'},
+        {name:'Mavoor Road', sales:'£388', pct:'76%'},
+        {name:'Palayam', sales:'£241', pct:'47%'},
+        {name:'Eranhipalam', sales:'£143', pct:'28%'}
+      ],
+      reports: ['Sales','Orders','Products','Branches','Loyalty'].map(n=>({name:n})),
+      adminControls: [
+        {name:'Menu & pricing', sub:'Permanent product setup', value:'12 products'},
+        {name:'Branch hours & prep times', sub:'Per branch defaults', value:'4 branches'},
+        {name:'Staff accounts', sub:'Sales Person access', value:'9 accounts'},
+        {name:'Popular section', sub:'You choose what is pinned', value:'4 pinned'}
+      ],
+      newestOrder: '#LL-2841 · 08:04',
+      refundOrder: '#LL-2801 · £6.20 · Palayam',
+      refundState: s.refunded ? 'Refunded' : 'Paid',
+      refundBg: s.refunded ? '#2A1A17' : '#241C16',
+      refundFg: s.refunded ? '#E2947F' : '#E9A23B',
+      refundNote: s.refunded
+        ? 'Refunded in full. The 6 beans earned on this order were reversed automatically, and the customer was notified.'
+        : 'Only Admin can refund. Points earned or spent on an order reverse automatically when it does.',
+      refundAction: s.refunded ? 'Refund issued — points reversed' : 'Issue full refund',
+      refundBtnBg: s.refunded ? '#2A1A17' : 'transparent',
+      issueRefund: () => { if(!s.refunded){ this.setState(st => ({refunded:true, points: st.points - 6})); this.toast('Refund processed', '£6.20 back to the customer’s card. 6 beans reversed, customer notified.'); } },
+      matrix: [
+        {name:'Browse & place orders', c:'✓', s:'—', a:'—'},
+        {name:'Customize items & pay', c:'✓', s:'—', a:'—'},
+        {name:'Manage the branch queue', c:'—', s:'✓', a:'✓'},
+        {name:'Mark an item sold out', c:'—', s:'✓', a:'✓'},
+        {name:'Set menu & prices', c:'—', s:'—', a:'✓'},
+        {name:'Set hours & prep times', c:'—', s:'—', a:'✓'},
+        {name:'Issue refunds', c:'—', s:'—', a:'✓'},
+        {name:'Configure loyalty rules', c:'—', s:'—', a:'✓'},
+        {name:'Manage staff accounts', c:'—', s:'—', a:'✓'}
+      ].map(r => ({...r, cFg: r.c==='✓'?'#7FB894':'#4A403A', sFg: r.s==='✓'?'#7FB894':'#4A403A', aFg: r.a==='✓'?'#7FB894':'#4A403A'})),
+      pushDemos: [
+        {name:'Flash promo', fire: () => this.setState({role:'customer', screen:'home', promo:true}, () => this.toast('Flash promo · 2 hours only', 'Any bun + filter coffee £4.50. Also pinned to your home screen.'))},
+        {name:'Order ready', fire: () => { this.setState({role:'customer', screen:'status', stage:2}); this.toast('Your order is ready', 'Collect from the pickup shelf at ' + br.name + '.'); }},
+        {name:'New paid order', fire: () => { this.setState({role:'staff'}); this.toast('New paid order · #LL-2842', '1× Cortado, 1× Pistachio Bun. Payment confirmed by the provider.'); }},
+        {name:'Refund notice', fire: () => { this.setState({role:'customer', screen:'rewards'}); this.toast('Refund issued · #LL-2801', '£6.20 back to your card. 6 beans reversed from your balance.'); }}
+      ],
+      loyaltyRules: [
+        {name:'Earn rate', value:'1 pt / £1'},
+        {name:'Redemption', value:'100 pts = £5 or a drink'},
+        {name:'Points expiry', value:'Off'},
+        {name:'Birthday treat', value:'Cake or £5'}
+      ],
+
+      goHome: () => this.set({screen:'home'}),
+      goMenu: () => this.set({screen:'menu'}),
+      goBag: () => this.set({screen:'bag'}),
+      goBranches: () => this.set({screen:'branches'}),
+      goRewards: () => this.set({screen:'rewards'}),
+      goPay: () => this.set({screen: s.signedIn ? 'pay' : 'signin'}),
+      back: () => this.set({screen: s.screen==='item' ? 'menu' : s.screen==='pay' ? 'bag' : s.screen==='signin' ? 'bag' : 'home'})
+    };
+  }
+}
+</script>
+</body>
+</html>
